@@ -1,8 +1,11 @@
 {
-  "name": "tanzeela_website",
+  "name": "tanzeela-website",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Tanzeela Khanam — Clinical Psychologist website",
+  "main": "server.js",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -14,6 +17,6 @@
   "dependencies": {
     "express": "^5.2.1",
     "marked": "^18.0.5",
-    "node-fetch": "^3.3.2"
+    "resend": "^6.12.4"
   }
 }

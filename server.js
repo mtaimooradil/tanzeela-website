@@ -1,35 +1,23 @@
-const express = require('express');
-const path    = require('path');
-const fs      = require('fs');
+const express    = require('express');
+const path       = require('path');
+const fs         = require('fs');
 const { marked } = require('marked');
-// Node 18+ has built-in fetch — no extra package needed
-
-const POSTS_DIR = path.join(__dirname, 'posts');
+const { Resend } = require('resend');
 
 const app        = express();
 const PORT       = process.env.PORT || 3000;
 const CHANNEL_ID = 'UCV-7eC8h1vxj66eadl6y5kQ';
 const RSS_URL    = `https://www.youtube.com/feeds/videos.xml?channel_id=${CHANNEL_ID}`;
+const POSTS_DIR  = path.join(__dirname, 'posts');
 
-// Parse JSON bodies
+// Resend client — requires RESEND_API_KEY env var in production
+const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+
 app.use(express.json());
-
-// Serve static files (index.html, etc.)
 app.use(express.static(path.join(__dirname)));
 
-// File where booking requests are stored
-const BOOKINGS_FILE = path.join(__dirname, 'bookings.json');
-
-function loadBookings() {
-  try { return JSON.parse(fs.readFileSync(BOOKINGS_FILE, 'utf8')); }
-  catch { return []; }
-}
-
-function saveBookings(list) {
-  fs.writeFileSync(BOOKINGS_FILE, JSON.stringify(list, null, 2));
-}
-
 // ── Blog helpers ──────────────────────────────────────
+
 function parseFrontmatter(raw) {
   const m = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
   if (!m) return { meta: {}, body: raw };
@@ -37,27 +25,23 @@ function parseFrontmatter(raw) {
   m[1].split('\n').forEach(line => {
     const idx = line.indexOf(':');
     if (idx === -1) return;
-    const key = line.slice(0, idx).trim();
-    const val = line.slice(idx + 1).trim();
-    meta[key] = val;
+    meta[line.slice(0, idx).trim()] = line.slice(idx + 1).trim();
   });
   return { meta, body: m[2] };
-}
-
-function slugFromFilename(filename) {
-  return filename.replace(/\.md$/, '');
 }
 
 function loadAllPosts() {
   const files = fs.readdirSync(POSTS_DIR).filter(f => f.endsWith('.md'));
   return files.map(file => {
-    const raw  = fs.readFileSync(path.join(POSTS_DIR, file), 'utf8');
+    const raw = fs.readFileSync(path.join(POSTS_DIR, file), 'utf8');
     const { meta } = parseFrontmatter(raw);
-    return { slug: slugFromFilename(file), ...meta };
+    return { slug: file.replace(/\.md$/, ''), ...meta };
   }).sort((a, b) => new Date(b.date) - new Date(a.date));
 }
 
 function loadPost(slug) {
+  // Sanitize: only allow lowercase letters, numbers, and hyphens
+  if (!/^[a-z0-9-]+$/.test(slug)) return null;
   const file = path.join(POSTS_DIR, `${slug}.md`);
   if (!fs.existsSync(file)) return null;
   const raw = fs.readFileSync(file, 'utf8');
@@ -65,28 +49,23 @@ function loadPost(slug) {
   return { slug, ...meta, html: marked(body) };
 }
 
-// GET /api/posts — list all posts (metadata only)
 app.get('/api/posts', (req, res) => {
-  try {
-    res.json({ posts: loadAllPosts() });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  try { res.json({ posts: loadAllPosts() }); }
+  catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// GET /api/posts/:slug — single post with HTML content
 app.get('/api/posts/:slug', (req, res) => {
   const post = loadPost(req.params.slug);
   if (!post) return res.status(404).json({ error: 'Post not found' });
   res.json({ post });
 });
 
-// Blog pages — serve blog.html / post.html
-app.get('/blog', (req, res) => res.sendFile(path.join(__dirname, 'blog.html')));
+app.get('/blog',       (req, res) => res.sendFile(path.join(__dirname, 'blog.html')));
 app.get('/blog/:slug', (req, res) => res.sendFile(path.join(__dirname, 'post.html')));
 
-// ── Contact ───────────────────────────────────────────
-app.post('/api/contact', (req, res) => {
+// ── Contact / booking ─────────────────────────────────
+
+app.post('/api/contact', async (req, res) => {
   const { name, email, phone, sessionType, concern, message } = req.body;
 
   if (!name?.trim() || !email?.trim()) {
@@ -94,72 +73,80 @@ app.post('/api/contact', (req, res) => {
   }
 
   const entry = {
-    id:          Date.now(),
     submittedAt: new Date().toISOString(),
     name:        name.trim(),
     email:       email.trim(),
-    phone:       phone?.trim() || '',
-    sessionType: sessionType || '',
-    concern:     concern || '',
-    message:     message?.trim() || '',
+    phone:       phone?.trim() || '—',
+    sessionType: sessionType || '—',
+    concern:     concern || '—',
+    message:     message?.trim() || '—',
   };
 
-  const bookings = loadBookings();
-  bookings.unshift(entry);   // newest first
-  saveBookings(bookings);
+  console.log(`\n📩 Booking from ${entry.name} <${entry.email}>`);
+  console.log(`   Session: ${entry.sessionType}  |  Concern: ${entry.concern}`);
+  if (entry.message !== '—') console.log(`   Message: ${entry.message}`);
 
-  console.log(`\n📩 New booking request from ${entry.name} <${entry.email}>`);
-  console.log(`   Session: ${entry.sessionType || '—'}  |  Concern: ${entry.concern || '—'}`);
-  if (entry.message) console.log(`   Message: ${entry.message}`);
+  // Send email via Resend if API key is configured
+  if (resend) {
+    try {
+      await resend.emails.send({
+        from:    'Bookings <bookings@tanzeelakhanam.com>',
+        to:      'tanzeela5974@gmail.com',
+        replyTo: entry.email,
+        subject: `New Booking Request — ${entry.name}`,
+        html: `
+          <h2 style="color:#1C3D5A">New Booking Request</h2>
+          <table style="border-collapse:collapse;width:100%;font-family:sans-serif;font-size:14px">
+            <tr><td style="padding:8px;color:#6B7A8A;width:140px"><b>Name</b></td><td style="padding:8px">${entry.name}</td></tr>
+            <tr style="background:#f8f8f8"><td style="padding:8px;color:#6B7A8A"><b>Email</b></td><td style="padding:8px"><a href="mailto:${entry.email}">${entry.email}</a></td></tr>
+            <tr><td style="padding:8px;color:#6B7A8A"><b>Phone</b></td><td style="padding:8px">${entry.phone}</td></tr>
+            <tr style="background:#f8f8f8"><td style="padding:8px;color:#6B7A8A"><b>Session Type</b></td><td style="padding:8px">${entry.sessionType}</td></tr>
+            <tr><td style="padding:8px;color:#6B7A8A"><b>Concern</b></td><td style="padding:8px">${entry.concern}</td></tr>
+            <tr style="background:#f8f8f8"><td style="padding:8px;color:#6B7A8A"><b>Message</b></td><td style="padding:8px">${entry.message}</td></tr>
+            <tr><td style="padding:8px;color:#6B7A8A"><b>Submitted</b></td><td style="padding:8px">${new Date(entry.submittedAt).toLocaleString('en-GB')}</td></tr>
+          </table>
+          <p style="margin-top:20px;font-size:12px;color:#999">Sent from tanzeelakhanam.com</p>
+        `,
+      });
+      console.log('   ✉️  Email sent via Resend');
+    } catch (err) {
+      console.error('   Resend error:', err.message);
+      // Don't fail the request — submission is still logged
+    }
+  } else {
+    console.log('   ⚠️  RESEND_API_KEY not set — email not sent');
+  }
 
-  res.json({ ok: true, message: 'Booking request saved.' });
+  res.json({ ok: true });
 });
 
-// Simple XML field extractor — no external XML parser needed
-function extractAll(xml, tag) {
-  const re = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'g');
-  const results = [];
-  let m;
-  while ((m = re.exec(xml)) !== null) results.push(m[1].trim());
-  return results;
-}
+// ── YouTube RSS ───────────────────────────────────────
 
-function extractFirst(xml, tag) {
-  const m = new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`).exec(xml);
-  return m ? m[1].trim() : '';
-}
-
-function extractAttr(xml, tag, attr) {
-  const m = new RegExp(`<${tag}[^>]*${attr}="([^"]*)"[^>]*>`).exec(xml);
-  return m ? m[1] : '';
-}
-
-// Cache: refresh at most once every 10 minutes
 let cache = { videos: [], ts: 0 };
 
 async function fetchVideos() {
   const now = Date.now();
   if (cache.videos.length && now - cache.ts < 10 * 60 * 1000) return cache.videos;
 
-  const res  = await fetch(RSS_URL, { headers: { 'User-Agent': 'Mozilla/5.0' } });
-  const xml  = await res.text();
+  const res = await fetch(RSS_URL, { headers: { 'User-Agent': 'Mozilla/5.0' } });
+  const xml = await res.text();
 
-  // Each video is wrapped in an <entry> block
-  const entries = extractAll(xml, 'entry');
+  const entryRe = /<entry>([\s\S]*?)<\/entry>/g;
+  const videos  = [];
+  let m;
 
-  const videos = entries.map(entry => {
-    // yt:videoId tag
+  while ((m = entryRe.exec(xml)) !== null) {
+    const entry   = m[1];
     const idMatch = /<yt:videoId>([^<]+)<\/yt:videoId>/.exec(entry);
-    const videoId = idMatch ? idMatch[1] : '';
-
-    // <title> — may be CDATA
-    let title = extractFirst(entry, 'title').replace(/<!\[CDATA\[|\]\]>/g, '').trim();
-
-    // Published date
-    const published = extractFirst(entry, 'published').split('T')[0];
-
-    return { videoId, title, published };
-  }).filter(v => v.videoId);
+    const titMatch = /<title>([^<]*)<\/title>/.exec(entry);
+    const pubMatch = /<published>([^<]*)<\/published>/.exec(entry);
+    if (!idMatch) continue;
+    videos.push({
+      videoId:   idMatch[1],
+      title:     titMatch ? titMatch[1].replace(/<!\[CDATA\[|\]\]>/g, '').trim() : '',
+      published: pubMatch ? pubMatch[1].split('T')[0] : '',
+    });
+  }
 
   cache = { videos, ts: now };
   return videos;
@@ -167,14 +154,11 @@ async function fetchVideos() {
 
 app.get('/api/videos', async (req, res) => {
   try {
-    const videos = await fetchVideos();
-    res.json({ videos });
+    res.json({ videos: await fetchVideos() });
   } catch (err) {
     console.error('RSS fetch error:', err.message);
-    res.status(502).json({ error: 'Could not fetch videos', details: err.message });
+    res.status(502).json({ error: 'Could not fetch videos' });
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running → http://localhost:${PORT}`);
-});
+app.listen(PORT, () => console.log(`Server running → http://localhost:${PORT}`));
