@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  check:
+    name: Lint & Verify
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check server syntax
+        run: node --check server.js
+
+      - name: Verify posts directory exists
+        run: test -d posts && echo "posts/ OK"
+
+      - name: Verify all markdown posts parse correctly
+        run: |
+          node -e "
+            const fs = require('fs');
+            const path = require('path');
+            const { marked } = require('marked');
+            const files = fs.readdirSync('posts').filter(f => f.endsWith('.md'));
+            if (!files.length) { console.error('No posts found'); process.exit(1); }
+            files.forEach(f => {
+              const raw = fs.readFileSync(path.join('posts', f), 'utf8');
+              const m = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+              if (!m) { console.error('Missing frontmatter in', f); process.exit(1); }
+              marked(m[2]);
+              console.log('OK:', f);
+            });
+          "
+
+      - name: Verify HTML files present
+        run: |
+          test -f index.html && echo "index.html OK"
+          test -f blog.html  && echo "blog.html OK"
+          test -f post.html  && echo "post.html OK"

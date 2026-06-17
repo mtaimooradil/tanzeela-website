@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Blog — Tanzeela Khanam</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --navy:   #1C3D5A;
+      --teal:   #2E7D9A;
+      --teal-lt:#4A9DBB;
+      --gold:   #B8884A;
+      --bg:     #F8F7F4;
+      --bg2:    #EEF2F5;
+      --text:   #2A2A2A;
+      --muted:  #6B7A8A;
+      --white:  #FFFFFF;
+      --radius: 12px;
+      --shadow: 0 4px 24px rgba(28,61,90,.09);
+    }
+
+    html { scroll-behavior: smooth; font-size: 16px; }
+    body { font-family: 'Inter', sans-serif; color: var(--text); background: var(--bg); line-height: 1.7; }
+    h1,h2,h3,h4 { font-family: 'Playfair Display', serif; line-height: 1.25; }
+    a { color: inherit; text-decoration: none; }
+    img { max-width: 100%; display: block; }
+    .container { max-width: 1060px; margin: 0 auto; padding: 0 28px; }
+
+    /* Nav */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(248,247,244,.92); backdrop-filter: blur(10px);
+      border-bottom: 1px solid rgba(28,61,90,.08);
+      box-shadow: 0 2px 20px rgba(28,61,90,.08);
+    }
+    .nav-inner {
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px; max-width: 1060px; margin: 0 auto; padding: 0 28px;
+    }
+    .nav-logo { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: var(--navy); font-weight: 600; }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a { font-size: .85rem; font-weight: 500; color: var(--muted); transition: color .2s; position: relative; }
+    .nav-links a:hover { color: var(--navy); }
+    .nav-links a:not(.nav-cta)::after {
+      content: ''; position: absolute; left: 0; bottom: -3px;
+      width: 100%; height: 2px; background: var(--teal);
+      transform: scaleX(0); transform-origin: left; transition: transform .22s ease;
+    }
+    .nav-links a:not(.nav-cta):hover::after { transform: scaleX(1); }
+    .nav-cta {
+      background: var(--teal); color: var(--white) !important;
+      padding: 8px 20px; border-radius: 50px;
+      font-size: .83rem !important; font-weight: 600 !important;
+      transition: background .2s !important;
+    }
+    .nav-cta:hover { background: var(--navy) !important; }
+
+    /* Hamburger */
+    .nav-hamburger {
+      display: none; flex-direction: column; justify-content: center;
+      gap: 5px; width: 36px; height: 36px;
+      background: none; border: none; cursor: pointer; padding: 4px;
+      border-radius: 6px; transition: background .15s;
+    }
+    .nav-hamburger:hover { background: rgba(28,61,90,.07); }
+    .nav-hamburger span { display: block; height: 2px; width: 100%; background: var(--navy); border-radius: 2px; transition: transform .3s, opacity .3s; transform-origin: center; }
+    .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+    .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+    .nav-drawer {
+      display: none; position: fixed; top: 64px; left: 0; right: 0;
+      background: rgba(248,247,244,.97); backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(28,61,90,.1);
+      padding: 16px 28px 24px; z-index: 99;
+      transform: translateY(-8px); opacity: 0;
+      transition: transform .25s ease, opacity .25s ease; pointer-events: none;
+    }
+    .nav-drawer.open { transform: translateY(0); opacity: 1; pointer-events: auto; }
+    .nav-drawer ul { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+    .nav-drawer a { display: block; padding: 11px 4px; font-size: .95rem; font-weight: 500; color: var(--muted); border-bottom: 1px solid rgba(28,61,90,.06); transition: color .2s; }
+    .nav-drawer a:hover { color: var(--navy); }
+    .nav-drawer .nav-cta { display: inline-block; margin-top: 14px; border-bottom: none; padding: 11px 24px !important; }
+
+    /* Hero */
+    .blog-hero {
+      background: linear-gradient(135deg, #EEF4F8 0%, #F8F7F4 60%);
+      padding: 140px 0 60px;
+    }
+    .blog-hero .section-label { font-size: .75rem; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--teal); margin-bottom: 10px; }
+    .blog-hero h1 { font-size: clamp(2rem, 4vw, 2.8rem); color: var(--navy); margin-bottom: 14px; }
+    .blog-hero p { color: var(--muted); font-size: 1rem; max-width: 520px; }
+
+    /* Filter chips */
+    .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 32px; }
+    .filter-chip {
+      font-size: .8rem; font-weight: 500; padding: 7px 16px; border-radius: 50px;
+      border: 1.5px solid rgba(28,61,90,.15); color: var(--navy);
+      cursor: pointer; transition: all .2s; background: var(--white);
+    }
+    .filter-chip:hover, .filter-chip.active {
+      background: var(--teal); color: var(--white); border-color: var(--teal);
+    }
+
+    /* Posts grid */
+    .posts-section { padding: 60px 0 90px; }
+    .posts-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+
+    .post-card {
+      background: var(--white); border-radius: var(--radius);
+      box-shadow: var(--shadow); overflow: hidden;
+      display: flex; flex-direction: column;
+      transition: transform .2s, box-shadow .2s;
+      cursor: pointer;
+    }
+    .post-card:hover { transform: translateY(-5px); box-shadow: 0 10px 36px rgba(28,61,90,.14); }
+
+    .post-card-accent {
+      height: 5px;
+    }
+
+    .post-card-body { padding: 26px 24px 24px; flex: 1; display: flex; flex-direction: column; }
+
+    .post-meta {
+      display: flex; align-items: center; gap: 10px;
+      font-size: .74rem; color: var(--muted); margin-bottom: 12px;
+    }
+    .post-category {
+      font-weight: 600; color: var(--teal);
+      background: rgba(46,125,154,.08);
+      padding: 3px 10px; border-radius: 50px;
+    }
+
+    .post-card h2 { font-size: 1.08rem; color: var(--navy); margin-bottom: 10px; line-height: 1.4; }
+    .post-card p { font-size: .87rem; color: var(--muted); line-height: 1.65; flex: 1; }
+
+    .post-card-footer {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-top: 20px; padding-top: 16px;
+      border-top: 1px solid rgba(28,61,90,.06);
+    }
+    .read-time { font-size: .76rem; color: var(--muted); }
+    .read-more {
+      font-size: .82rem; font-weight: 600; color: var(--teal);
+      display: flex; align-items: center; gap: 5px;
+      transition: gap .2s;
+    }
+    .post-card:hover .read-more { gap: 9px; }
+
+    .posts-empty { text-align: center; padding: 80px 0; color: var(--muted); grid-column: 1/-1; }
+
+    /* Category accent colours */
+    .accent-cbt      { background: linear-gradient(90deg, #2E7D9A, #4A9DBB); }
+    .accent-mental   { background: linear-gradient(90deg, #5B8DD9, #7BA7E7); }
+    .accent-trauma   { background: linear-gradient(90deg, #B8884A, #D4A872); }
+    .accent-research { background: linear-gradient(90deg, #6B7A8A, #8A98A5); }
+    .accent-default  { background: linear-gradient(90deg, var(--navy), var(--teal)); }
+
+    /* Animations */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(28px); } to { opacity:1; transform:translateY(0); } }
+    .blog-hero .section-label { animation: fadeUp .5s ease forwards; }
+    .blog-hero h1 { animation: fadeUp .6s ease .1s both; }
+    .blog-hero p  { animation: fadeUp .6s ease .2s both; }
+    .filter-bar   { animation: fadeUp .6s ease .3s both; }
+
+    .post-card { opacity: 0; transform: translateY(24px); transition: opacity .5s ease, transform .5s ease, box-shadow .2s, box-shadow .2s; }
+    .post-card.visible { opacity: 1; transform: translateY(0); }
+
+    /* Footer */
+    footer { background: #111E28; padding: 28px 0; }
+    .footer-inner { max-width: 1060px; margin: 0 auto; padding: 0 28px; display: flex; align-items: center; justify-content: space-between; }
+    .footer-logo { font-family: 'Playfair Display', serif; font-size: .95rem; color: rgba(255,255,255,.6); }
+    .footer-links { display: flex; gap: 22px; }
+    .footer-links a { font-size: .82rem; color: rgba(255,255,255,.4); transition: color .2s; }
+    .footer-links a:hover { color: rgba(255,255,255,.8); }
+    .footer-copy { font-size: .78rem; color: rgba(255,255,255,.3); }
+
+    @media (max-width: 800px) {
+      .posts-grid { grid-template-columns: 1fr 1fr; }
+      .nav-links { display: none; }
+      .nav-hamburger { display: flex; }
+      .nav-drawer { display: block; }
+      .footer-inner { flex-direction: column; gap: 12px; text-align: center; }
+    }
+    @media (max-width: 520px) {
+      .posts-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">Tanzeela Khanam</a>
+    <ul class="nav-links">
+      <li><a href="/#about">About</a></li>
+      <li><a href="/#services">Services</a></li>
+      <li><a href="/#experience">Experience</a></li>
+      <li><a href="/blog" style="color:var(--navy)">Blog</a></li>
+      <li><a href="/#videos">Videos</a></li>
+      <li><a href="/#contact" class="nav-cta">Book a Session</a></li>
+    </ul>
+    <button class="nav-hamburger" id="nav-hamburger" aria-label="Toggle menu" aria-expanded="false">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+<div class="nav-drawer" id="nav-drawer">
+  <ul>
+    <li><a href="/#about">About</a></li>
+    <li><a href="/#services">Services</a></li>
+    <li><a href="/#experience">Experience</a></li>
+    <li><a href="/blog">Blog</a></li>
+    <li><a href="/#videos">Videos</a></li>
+  </ul>
+  <a href="/#contact" class="nav-cta">Book a Session</a>
+</div>
+
+<div class="blog-hero">
+  <div class="container">
+    <p class="section-label">Blog</p>
+    <h1>Mental Health &amp; Psychology</h1>
+    <p>Evidence-based insights on anxiety, trauma, therapy, and psychological well-being — written for anyone who wants to understand their mind better.</p>
+
+    <div class="filter-bar" id="filter-bar">
+      <button class="filter-chip active" data-cat="all">All Posts</button>
+      <button class="filter-chip" data-cat="Mental Health">Mental Health</button>
+      <button class="filter-chip" data-cat="CBT & Therapy">CBT &amp; Therapy</button>
+      <button class="filter-chip" data-cat="Trauma & Recovery">Trauma &amp; Recovery</button>
+      <button class="filter-chip" data-cat="Research">Research</button>
+    </div>
+  </div>
+</div>
+
+<section class="posts-section">
+  <div class="container">
+    <div class="posts-grid" id="posts-grid">
+      <div class="posts-empty">Loading posts…</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">Tanzeela Khanam</div>
+    <div class="footer-links">
+      <a href="/">Home</a>
+      <a href="/blog">Blog</a>
+      <a href="/#contact">Contact</a>
+      <a href="https://www.linkedin.com/in/tanzeela-khanam-56b6b325a/" target="_blank">LinkedIn</a>
+      <a href="https://www.youtube.com/@tanzeelakhanam4972" target="_blank">YouTube</a>
+    </div>
+    <div class="footer-copy">© <span id="yr"></span> Tanzeela Khanam</div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('yr').textContent = new Date().getFullYear();
+
+  /* Hamburger */
+  const hamburger = document.getElementById('nav-hamburger');
+  const drawer    = document.getElementById('nav-drawer');
+  function toggleMenu(force) {
+    const isOpen = force !== undefined ? force : !hamburger.classList.contains('open');
+    hamburger.classList.toggle('open', isOpen);
+    drawer.classList.toggle('open', isOpen);
+    hamburger.setAttribute('aria-expanded', isOpen);
+  }
+  hamburger.addEventListener('click', () => toggleMenu());
+  drawer.querySelectorAll('a').forEach(a => a.addEventListener('click', () => toggleMenu(false)));
+  window.addEventListener('scroll', () => { if (drawer.classList.contains('open')) toggleMenu(false); }, { passive: true });
+
+  /* Category accent */
+  function accentClass(cat) {
+    if (!cat) return 'accent-default';
+    const c = cat.toLowerCase();
+    if (c.includes('cbt') || c.includes('therapy')) return 'accent-cbt';
+    if (c.includes('mental')) return 'accent-mental';
+    if (c.includes('trauma')) return 'accent-trauma';
+    if (c.includes('research')) return 'accent-research';
+    return 'accent-default';
+  }
+
+  function formatDate(d) {
+    return new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
+
+  function renderPosts(posts) {
+    const grid = document.getElementById('posts-grid');
+    if (!posts.length) {
+      grid.innerHTML = '<div class="posts-empty">No posts found.</div>';
+      return;
+    }
+    grid.innerHTML = posts.map((p, i) => `
+      <a class="post-card" href="/blog/${p.slug}" style="transition-delay:${i * 0.08}s">
+        <div class="post-card-accent ${accentClass(p.category)}"></div>
+        <div class="post-card-body">
+          <div class="post-meta">
+            <span class="post-category">${p.category || 'General'}</span>
+            <span>${formatDate(p.date)}</span>
+          </div>
+          <h2>${p.title}</h2>
+          <p>${p.excerpt}</p>
+          <div class="post-card-footer">
+            <span class="read-time">🕐 ${p.readTime || '5 min read'}</span>
+            <span class="read-more">Read more →</span>
+          </div>
+        </div>
+      </a>`).join('');
+
+    /* Animate cards in */
+    requestAnimationFrame(() => {
+      grid.querySelectorAll('.post-card').forEach((card, i) => {
+        setTimeout(() => card.classList.add('visible'), i * 80);
+      });
+    });
+  }
+
+  let allPosts = [];
+
+  async function loadPosts() {
+    try {
+      const res = await fetch('/api/posts');
+      const { posts } = await res.json();
+      allPosts = posts;
+      renderPosts(posts);
+    } catch {
+      document.getElementById('posts-grid').innerHTML =
+        '<div class="posts-empty">Could not load posts.</div>';
+    }
+  }
+
+  /* Category filter */
+  document.getElementById('filter-bar').addEventListener('click', e => {
+    const chip = e.target.closest('.filter-chip');
+    if (!chip) return;
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    const cat = chip.dataset.cat;
+    renderPosts(cat === 'all' ? allPosts : allPosts.filter(p => p.category === cat));
+  });
+
+  loadPosts();
+</script>
+</body>
+</html>
