@@ -62,6 +62,8 @@ app.get('/api/posts/:slug', (req, res) => {
 
 app.get('/blog',       (req, res) => res.sendFile(path.join(__dirname, 'blog.html')));
 app.get('/blog/:slug', (req, res) => res.sendFile(path.join(__dirname, 'post.html')));
+app.get('/admin',      (req, res) => res.sendFile(path.join(__dirname, 'admin/index.html')));
+app.get('/admin/config.yml', (req, res) => res.sendFile(path.join(__dirname, 'admin/config.yml')));
 
 // ── Contact / booking ─────────────────────────────────
 
