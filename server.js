@@ -91,7 +91,7 @@ app.post('/api/contact', async (req, res) => {
     try {
       await resend.emails.send({
         from:    'Bookings <bookings@tanzeelakhanam.com>',
-        to:      'tanzeela5974@gmail.com',
+        to:      'taimooradil1998@gmail.com',
         replyTo: entry.email,
         subject: `New Booking Request — ${entry.name}`,
         html: `
