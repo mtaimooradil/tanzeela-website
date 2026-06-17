@@ -57,10 +57,12 @@
     }
 
     .nav-logo {
-      font-family: 'Playfair Display', serif;
-      font-size: 1.1rem;
-      color: var(--navy);
-      font-weight: 600;
+      display: flex;
+      align-items: center;
+    }
+    .nav-logo img {
+      height: 38px;
+      width: auto;
     }
 
     .nav-links { display: flex; gap: 32px; list-style: none; }
@@ -201,8 +203,6 @@
     .hero-avatar-fallback {
       width: 100%; height: 100%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 2.8rem; color: rgba(255,255,255,.9);
-      font-family: 'Playfair Display', serif; font-weight: 600;
     }
 
     .hero-text { max-width: 680px; position: relative; z-index: 1; }
@@ -807,9 +807,10 @@
       display: flex; align-items: center; justify-content: space-between;
     }
 
-    .footer-logo {
-      font-family: 'Playfair Display', serif;
-      font-size: .95rem; color: rgba(255,255,255,.6);
+    .footer-logo img {
+      height: 32px;
+      width: auto;
+      opacity: .75;
     }
 
     .footer-links { display: flex; gap: 22px; }
@@ -1111,7 +1112,7 @@
 <!-- ── NAV ───────────────────────────────────────────── -->
 <nav>
   <div class="nav-inner">
-    <span class="nav-logo">Tanzeela Khanam</span>
+    <a href="#" class="nav-logo"><img src="/logo-dark.svg" alt="Tanzeela Khanam" /></a>
     <ul class="nav-links">
       <li><a href="#about">About</a></li>
       <li><a href="#services">Services</a></li>
@@ -1148,7 +1149,11 @@
   <div class="hero-avatar">
     <img src="photo.jpg" alt="Tanzeela Khanam"
          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
-    <div class="hero-avatar-fallback" style="display:none">T</div>
+    <div class="hero-avatar-fallback" style="display:none">
+      <svg viewBox="0 0 1080 1080" xmlns="http://www.w3.org/2000/svg" style="width:70%;height:70%;fill:#ffffff;">
+        <path d="M 125.79883,309.80078 V 411 h 42.80078 V 352.59961 H 292.19922 V 608.12109 C 231.49487,593.01629 191.33594,572.26367 191.33594,572.26367 l -4.42969,-2.30469 -18.51563,35.4375 4.42188,2.31836 c 0,0 48.04315,25.06311 119.38672,41.56446 v 120.91992 h 42.80273 V 657.41797 c 79.57328,12.10527 178.424,9.2903 272.39649,-42.36719 v 112.34961 h -43.19922 v 42.79883 h 146 v -42.79883 h -60 V 590.625 l 60.93164,-54.91211 c 35.86909,12.13035 61.77141,29.41077 86.21875,63.2168 25.06954,34.66641 48.40204,86.91435 77.54687,167.96093 l 1.18946,3.3086 h 78.11328 v -42.79883 h -46.42774 c -29.36971,-74.92774 -51.61132,-123.18281 -76.3457,-156.76562 -23.54743,-31.97126 -49.68955,-50.59281 -85.22656,-66.1504 l 164.1582,-151.88476 h 28.24414 V 309.80078 H 828.19922 v 42.79883 h 21.73437 L 650.19922,535.44727 V 352.59961 h 60 v -42.79883 h -146 v 42.79883 h 43.19922 V 568.625 C 515.06584,627.40143 414.42179,629.99659 335,617 V 352.59961 H 457.79883 V 411 h 42.80273 V 309.80078 Z"/>
+      </svg>
+    </div>
   </div>
 
   <div class="hero-text">
@@ -1647,7 +1652,7 @@
 <!-- ── FOOTER ─────────────────────────────────────────── -->
 <footer>
   <div class="footer-inner">
-    <div class="footer-logo">Tanzeela Khanam</div>
+    <div class="footer-logo"><img src="/logo-white.svg" alt="Tanzeela Khanam" /></div>
     <div class="footer-links">
       <a href="#about">About</a>
       <a href="#services">Services</a>

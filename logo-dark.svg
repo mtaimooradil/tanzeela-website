@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="1080"
+   height="1080"
+   viewBox="0 0 1080 1080"
+   version="1.1"
+   id="svg1"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <g
+     id="layer2"
+     transform="translate(-1418.0975)">
+    <rect
+       style="display:none;fill:#ffffff;fill-opacity:1"
+       id="rect1-7"
+       width="1080"
+       height="1080"
+       x="1418.0975"
+       y="0" />
+    <path
+       d="M 1543.8964,309.80078 V 411 h 42.8008 v -58.40039 h 123.5996 v 255.52148 c -60.7043,-15.1048 -100.8633,-35.85742 -100.8633,-35.85742 l -4.4296,-2.30469 -18.5157,35.4375 4.4219,2.31836 c 0,0 48.0432,25.06311 119.3867,41.56446 v 120.91992 h 42.8027 V 657.41797 c 79.5733,12.10527 178.424,9.2903 272.3965,-42.36719 v 112.34961 h -43.1992 v 42.79883 h 146 v -42.79883 h -60 V 590.625 l 60.9317,-54.91211 c 35.8691,12.13035 61.7714,29.41077 86.2187,63.2168 25.0696,34.66641 48.4021,86.91435 77.5469,167.96093 l 1.1894,3.3086 h 78.1133 v -42.79883 h -46.4277 c -29.3697,-74.92774 -51.6113,-123.18281 -76.3457,-156.76562 -23.5474,-31.97126 -49.6896,-50.59281 -85.2266,-66.1504 L 2328.455,352.59961 h 28.2442 v -42.79883 h -110.4024 v 42.79883 h 21.7344 L 2068.2968,535.44727 V 352.59961 h 60 v -42.79883 h -146 v 42.79883 h 43.1992 V 568.625 C 1933.1634,627.40143 1832.5194,629.99659 1753.0976,617 V 352.59961 h 122.7988 V 411 h 42.8028 V 309.80078 Z"
+       style="font-size:800px;font-family:'TeX Gyre Cursor';-inkscape-font-specification:'TeX Gyre Cursor';text-align:center;letter-spacing:-40px;word-spacing:0.03px;baseline-shift:baseline;text-anchor:middle;white-space:pre;display:inline;overflow:visible;vector-effect:none;fill:#000000;fill-opacity:1;enable-background:accumulate;stop-color:#000000"
+       id="path6-1" />
+  </g>
+</svg>
